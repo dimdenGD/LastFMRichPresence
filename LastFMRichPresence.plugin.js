@@ -1,7 +1,7 @@
 /**
  * @name LastFMRichPresence
  * @version 0.0.2
- * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) for how to make it work.
+ * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
  * @authorLink https://dimden.dev/
@@ -3795,7 +3795,7 @@ class LastFMRichPresence {
         return "LastFMRichPresence";
     }
     getDescription() {
-        return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) for how to make it work.";
+        return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
         return "0.0.2";
