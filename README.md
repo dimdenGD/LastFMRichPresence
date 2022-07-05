@@ -7,7 +7,7 @@ You can also set to not show Last.fm when you're listening from Spotify.
 ## Installation
 * Download [this](https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js) file and put it in BetterDiscord plugin folder.  
 * Go to [Last.fm API](https://www.last.fm/api) and create API key (it only takes few minutes).  
-* Put Last.fm and your Last.fm username in plugin settings.  
+* Put Last.fm key and your Last.fm username in plugin settings.  
 * Wait a minute and it should start working  
   
 ![Option menu](https://lune.dimden.dev/29fcedb94f.png)  
