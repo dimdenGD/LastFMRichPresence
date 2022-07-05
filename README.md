@@ -1,0 +1,1 @@
+# LastFMPresence BetterDiscord Plugin
