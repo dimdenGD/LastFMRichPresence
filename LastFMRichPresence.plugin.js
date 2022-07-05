@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 0.0.1
+ * @version 0.0.2
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) for how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
@@ -67,12 +67,12 @@ const validButtonURLRegex = /^http(s)?:\/\/[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "0.0.1",
+    version: "0.0.2",
     changelog: [
         {
-            title: "v0.0.1: Creation",
+            title: "v0.0.2: Disable when Spotify",
             items: [
-                "Hello.",
+                "You can now disable Last.fm Rich Presence when you're playing music from Spotify.",
             ]
         }
     ]
@@ -3698,7 +3698,6 @@ let RPClient;
 
         const instance = new class RP extends EventEmitter {
             updatePresence(d) {
-                console.log('update', d);
                 if (connected)
                     rpc.setActivity(d)
                         .catch((e) => this.emit('error', e));
@@ -3790,6 +3789,7 @@ class LastFMRichPresence {
         this.paused = false;
         this.startPlaying = Date.now();
         this.updateDataInterval = 0;
+        this.closed = false;
     }
     getName() {
         return "LastFMRichPresence";
@@ -3798,7 +3798,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) for how to make it work.";
     }
     getVersion() {
-        return "0.0.1";
+        return "0.0.2";
     }
     getAuthor() {
         return "dimden#9900 (dimden.dev)";
@@ -3922,11 +3922,20 @@ class LastFMRichPresence {
 <span>Input your Last.fm username.</span><br>
 <input class="lastfmnickname inputDefault-3FGxgL input-2g-os5" placeholder="last.fm username" style="width:80%">
 <br>
+<b>Disable RPC when Spotify is playing</b>
+<span>Disables Rich Presence when you play music from Spotify.
+Useful when you want Last.fm to show when you listen to other sources but not Spotify.</span><br>
+<select class="disablewhenspotify inputDefault-3FGxgL input-2g-os5" style="width:80%">
+    <option value="false">OFF</option>
+    <option value="true">ON</option>
+</select>
 </div>`;
         let keyEl = template.content.firstElementChild.getElementsByClassName('lastfmkey')[0];
         let nicknameEl = template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0];
-        template.content.firstElementChild.getElementsByClassName('lastfmkey')[0].value = this.settings.lastFMKey;
-        template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0].value = this.settings.lastFMNickname;
+        let dwsEl = template.content.firstElementChild.getElementsByClassName('disablewhenspotify')[0];
+        keyEl.value = this.settings.lastFMKey;
+        nicknameEl.value = this.settings.lastFMNickname;
+        dwsEl.value = this.settings.disableWhenSpotify ? "true" : "false";
         let updateKey = () => {
             this.settings.lastFMKey = keyEl.value;
             this.updateSettings();
@@ -3935,12 +3944,16 @@ class LastFMRichPresence {
             this.settings.lastFMNickname = nicknameEl.value;
             this.updateSettings();
         }
-        template.content.firstElementChild.getElementsByClassName('lastfmkey')[0].onchange = updateKey;
-        template.content.firstElementChild.getElementsByClassName('lastfmkey')[0].onpaste = updateKey;
-        template.content.firstElementChild.getElementsByClassName('lastfmkey')[0].onkeydown = updateKey;
-        template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0].onchange = updateNick;
-        template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0].onpaste = updateNick;
-        template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0].onkeydown = updateNick;
+        keyEl.onchange = updateKey;
+        keyEl.onpaste = updateKey;
+        keyEl.onkeydown = updateKey;
+        nicknameEl.onchange = updateNick;
+        nicknameEl.onpaste = updateNick;
+        nicknameEl.onkeydown = updateNick;
+        dwsEl.onchange = () => {
+            this.settings.disableWhenSpotify = dwsEl.value === "true";
+            this.updateSettings();
+        };
 
         return template.content.firstElementChild;
     }
@@ -3962,6 +3975,15 @@ class LastFMRichPresence {
         }
         if (!this.client) {
             return this._startRichPresence();
+        }
+        if(this.settings.disableWhenSpotify) {
+            const activities = BdApi.findModuleByProps("getLocalPresence").getLocalPresence().activities;
+            if(activities.find(a => a.name === "Spotify")) {
+                if(activities.find(a => a.name === "some music")) {
+                    this.client.clearPresence();
+                }
+                return;
+            }
         }
         const buttons = [];
         if (this.activeProfile.button1Label && this.activeProfile.button1URL) {
@@ -3996,85 +4018,8 @@ class LastFMRichPresence {
         });
     }
     async _stopRichPresence() {
+        this.closed = true;
         return this.client?.disconnect?.();
-    }
-    buildActivityObject() {
-        const activityObject = {
-            isSocketConnected: () => true,
-            socket: {
-                transport: "ipc",
-                id: "1",
-                version: 1,
-                encoding: "json",
-                application: {
-                    id: ClientID,
-                    name: this.rpcClientInfo.name,
-                    icon: null,
-                    coverImage: this.rpcClientInfo.coverImage,
-                    flags: this.rpcClientInfo.flags
-                }
-            },
-            cmd: "SET_ACTIVITY",
-            args: {
-                pid: require("process").pid,
-                activity: {
-                    timestamps: {},
-                    assets: {},
-                    buttons: [],
-                    name: this.rpcClientInfo.name,
-                    application_id: ClientID
-                }
-            }
-        };
-        if (this.activeProfile.details) {
-            activityObject.args.activity.details = this.activeProfile.details;
-        }
-        if (this.activeProfile.state) {
-            activityObject.args.activity.state = this.activeProfile.state;
-        }
-        if (this.activeProfile.enableStartTime) {
-            activityObject.args.activity.timestamps.start = Math.floor(this.startTime / 1000) * 1000;
-        }
-        if (this.activeProfile.largeImageKey) {
-            activityObject.args.activity.assets.large_image = this.activeProfile.largeImageKey;
-            if (this.activeProfile.largeImageText) {
-                activityObject.args.activity.assets.large_text = this.activeProfile.largeImageText;
-            }
-        }
-        if (this.activeProfile.smallImageKey) {
-            activityObject.args.activity.assets.small_image = this.activeProfile.smallImageKey;
-            if (this.activeProfile.smallImageText) {
-                activityObject.args.activity.assets.small_text = this.activeProfile.smallImageText;
-            }
-        }
-        if (this.activeProfile.button1Label && this.activeProfile.button1URL) {
-            if (this.activeProfile.button1Label.length > 32) {
-                BdApi.showToast("Button 1 label must not exceed 32 characters.", { type: "error" });
-            } else if (validButtonURLRegex.test(this.activeProfile.button1URL)) {
-                activityObject.args.activity.buttons.push({
-                    label: this.activeProfile.button1Label,
-                    url: this.activeProfile.button1URL
-                });
-            } else {
-                console.error("LastFMRichPresence: Invalid button 1 URL.");
-            }
-        }
-        if (this.activeProfile.button2Label && this.activeProfile.button2URL) {
-            if (this.activeProfile.button2Label.length > 32) {
-                BdApi.showToast("Button 2 label must not exceed 32 characters.", { type: "error" });
-            } else if (validButtonURLRegex.test(this.activeProfile.button2URL)) {
-                activityObject.args.activity.buttons.push({
-                    label: this.activeProfile.button2Label,
-                    url: this.activeProfile.button2URL
-                });
-            } else {
-                console.error("LastFMRichPresence: Invalid button 2 URL.");
-            }
-        }
-        if (!activityObject.args.activity.buttons.length) {
-            delete activityObject.args.activity.buttons;
-        }
-        return activityObject;
     }
     async _startRichPresence() {
         this.client?.removeAllListeners?.();
@@ -4088,7 +4033,17 @@ class LastFMRichPresence {
             console.error(e);
             this.client?.removeAllListeners?.();
             this.client?.disconnect?.();
-            BdApi.showToast("Rich Presence client ID authentication failed. Contact dimden#9900 in discord.gg/k4u7ddk.", { type: "error" });
+            setTimeout(() => {
+                this.startRichPresence();
+            }, 3000);
+            BdApi.showToast("Rich Presence client ID authentication failed.", { type: "error" });
+        });
+        this.client.on("close", () => {
+            if(!this.initialized || this.closed) return;
+            console.warn("RPC Disconnected, reconnecting...");
+            setTimeout(() => {
+                this.startRichPresence();
+            }, 1000);
         });
         this._updateRichPresence();
     }
