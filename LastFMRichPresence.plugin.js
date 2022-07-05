@@ -3708,8 +3708,6 @@ let RPClient;
                 if (connected)
                     rpc.clearActivity()
                         .catch((e) => this.emit('error', e));
-                else
-                    activityCache = d;
             }
 
             reply(user, response) {
@@ -3784,12 +3782,12 @@ class LastFMRichPresence {
     constructor() {
         this.initialized = false;
         this.settings = {};
-        this.activeProfile = {};
         this.trackData = {};
         this.paused = false;
         this.startPlaying = Date.now();
         this.updateDataInterval = 0;
         this.closed = false;
+        this.connectionErrors = 0;
     }
     getName() {
         return "LastFMRichPresence";
@@ -3840,7 +3838,7 @@ class LastFMRichPresence {
     async stop() {
         clearInterval(this.updateDataInterval);
         this.updateDataInterval = 0;
-        this.activeProfile = {};
+        this.trackData = {};
         this.stopRichPresence();
         this.initialized = false;
         BdApi.showToast("LastFMRichPresence is stopping!");
@@ -3862,15 +3860,6 @@ class LastFMRichPresence {
         } catch (e) {
             console.error(e);
             return;
-        }
-        this.activeProfile = {
-            details: data.name,
-            state: data?.album?.['#text'] ? `${data?.artist?.['#text']} - ${data?.album?.['#text']}` : data?.artist?.['#text'],
-            startTimestamp: Math.floor(this.startPlaying / 1000),
-            smallImageKey: "lastfm",
-            smallImageText: "Last.fm",
-            button1Label: "Open Last.fm",
-            button1URL: data.url
         }
     }
     getLastFmData() {
@@ -3906,7 +3895,7 @@ class LastFMRichPresence {
     }
     async pause() {
         if (this.paused) return;
-        this.activeProfile = {};
+        this.trackData = {};
         this.paused = true;
         this.client.clearPresence();
     }
@@ -3970,7 +3959,7 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
         this.functionQueue.push(() => this._stopRichPresence());
     }
     _updateRichPresence() {
-        if (this.paused) {
+        if (this.paused || !this.trackData?.name) {
             return;
         }
         if (!this.client) {
@@ -3979,42 +3968,24 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
         if(this.settings.disableWhenSpotify) {
             const activities = BdApi.findModuleByProps("getLocalPresence").getLocalPresence().activities;
             if(activities.find(a => a.name === "Spotify")) {
-                if(activities.find(a => a.name === "some music")) {
+                if(activities.find(a =>a.name === "some music")) {
                     this.client.clearPresence();
                 }
                 return;
             }
         }
-        const buttons = [];
-        if (this.activeProfile.button1Label && this.activeProfile.button1URL) {
-            if (validButtonURLRegex.test(this.activeProfile.button1URL)) {
-                buttons.push({
-                    label: this.activeProfile.button1Label,
-                    url: this.activeProfile.button1URL
-                });
-            } else {
-                console.error("LastFMRichPresence: Invalid button 1 URL.");
-            }
-        }
-        if (this.activeProfile.button2Label && this.activeProfile.button2URL) {
-            if (validButtonURLRegex.test(this.activeProfile.button2URL)) {
-                buttons.push({
-                    label: this.activeProfile.button2Label,
-                    url: this.activeProfile.button2URL
-                });
-            } else {
-                console.error("LastFMRichPresence: Invalid button 2 URL.");
-            }
-        }
         this.client.updatePresence({
-            details: this.activeProfile.details || undefined,
-            state: this.activeProfile.state || undefined,
-            startTimestamp: this.activeProfile.startTimestamp || undefined,
-            largeImageKey: this.activeProfile.largeImageKey || undefined,
-            smallImageKey: this.activeProfile.smallImageKey || undefined,
-            largeImageText: this.activeProfile.largeImageText || undefined,
-            smallImageText: this.activeProfile.smallImageText || undefined,
-            buttons: buttons.length ? buttons : null
+            details: this.trackData.name,
+            state: this.trackData?.album?.['#text'] ? `${this.trackData?.artist?.['#text']} - ${this.trackData?.album?.['#text']}` : this.trackData?.artist?.['#text'],
+            startTimestamp: Math.floor(this.startPlaying / 1000),
+            smallImageKey: "lastfm",
+            smallImageText: "Last.fm",
+            buttons: [
+                {
+                    label: "Open Last.fm",
+                    url: this.trackData.url
+                }
+            ]
         });
     }
     async _stopRichPresence() {
@@ -4036,7 +4007,7 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
             setTimeout(() => {
                 this.startRichPresence();
             }, 3000);
-            BdApi.showToast("Rich Presence client ID authentication failed.", { type: "error" });
+            if(this.connectionErrors++ <= 3) BdApi.showToast("Rich Presence client ID authentication failed.", { type: "error" });
         });
         this.client.on("close", () => {
             if(!this.initialized || this.closed) return;
