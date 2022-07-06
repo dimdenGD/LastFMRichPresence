@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 0.0.3
+ * @version 0.0.4
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
@@ -66,12 +66,12 @@ const ClientID = "497515459474620417";
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "0.0.3",
+    version: "0.0.4",
     changelog: [
         {
-            title: "v0.0.3: 'Listen on YouTube'",
+            title: "v0.0.4: 'Listen on Soundcloud'",
             items: [
-                "Now it shows 'Listen on Youtube' button when it can find YouTube link.",
+                "You can set Soundcloud Authorization key and get 'Listen on Soundcloud' button when listening on Soundcloud.",
             ]
         }
     ]
@@ -3795,7 +3795,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "0.0.3";
+        return "0.0.4";
     }
     getAuthor() {
         return "dimden#9900 (dimden.dev)";
@@ -3880,12 +3880,46 @@ class LastFMRichPresence {
                 if (trackData.name !== this.trackData?.name) {
                     this.startPlaying = Date.now();
                     trackData.youtubeUrl = await new Promise((resolve, reject) => {
+                        // try getting youtube url
                         require('request').get(trackData.url, (error, response, body) => {
-                            if (error) return undefined;
+                            if (error) return;
                             let match = body.match(/data-youtube-url="(.*?)"/)?.[1];
                             resolve(match);
                         });
                     });
+                    if(!trackData.youtubeUrl && this.settings.soundcloudKey) {
+                        // try getting soundcloud url
+                        trackData.soundcloudUrl = await new Promise((resolve, reject) => {
+                            require('request').get({
+                                url: `https://api-v2.soundcloud.com/search?q=${(trackData?.album?.['#text'] ? `${trackData?.artist?.['#text']}%20-%20${trackData?.album?.['#text']}` : trackData?.artist?.['#text'])}%20-%20${trackData.name}&facet=model&limit=1&offset=0&linked_partitioning=1&app_version=1657010671&app_locale=en`,
+                                headers: {
+                                    Authorization: this.settings?.soundcloudKey?.startsWith("OAuth ") ? this.settings?.soundcloudKey : `OAuth ${this.settings?.soundcloudKey}`
+                                }
+                            }, (error, response, body) => {
+                                if (error) return;
+                                try {
+                                    body = JSON.parse(body);
+                                } catch (e) {
+                                    return;
+                                }
+                                if(!body.collection || body.collection?.length === 0) return;
+                                let coll = body.collection[0];
+                                if(coll.kind === "track") {
+                                    if(coll.title === trackData.name) {
+                                        resolve(coll.permalink_url);
+                                    }
+                                } else if(coll.kind === "playlist") {
+                                    let tracks = coll.tracks;
+                                    for(let i = 0; i < tracks.length; i++) {
+                                        if(tracks[i].title === trackData.name) {
+                                            resolve(tracks[i].permalink_url);
+                                            break;
+                                        }
+                                    }
+                                }
+                            });
+                        });
+                    }
                     setTimeout(() => this.updateRichPresence(), 50);
                 }
                 if (trackData?.['@attr']?.nowplaying) {
@@ -3924,12 +3958,20 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
     <option value="false">OFF</option>
     <option value="true">ON</option>
 </select>
+<br>
+<b>Soundcloud Button</b>
+(OPTIONAL)
+Show 'Listen on Soundcloud' button in the RP when listening from Soundcloud.
+Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_blank">homepage</a> for info about getting this field.<br>
+<input class="soundcloudkey inputDefault-3FGxgL input-2g-os5" placeholder="Soundcloud Authorization key" style="width:80%">
 </div>`;
         let keyEl = template.content.firstElementChild.getElementsByClassName('lastfmkey')[0];
         let nicknameEl = template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0];
         let dwsEl = template.content.firstElementChild.getElementsByClassName('disablewhenspotify')[0];
+        let soundcloudEl = template.content.firstElementChild.getElementsByClassName('soundcloudkey')[0];
         keyEl.value = this.settings.lastFMKey;
         nicknameEl.value = this.settings.lastFMNickname;
+        soundcloudEl.value = this.settings.soundcloudKey ?? "";
         dwsEl.value = this.settings.disableWhenSpotify ? "true" : "false";
         let updateKey = () => {
             this.settings.lastFMKey = keyEl.value;
@@ -3939,12 +3981,19 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
             this.settings.lastFMNickname = nicknameEl.value;
             this.updateSettings();
         }
+        let updateSoundcloudKey = () => {
+            this.settings.soundcloudKey = soundcloudEl.value;
+            this.updateSettings();
+        }
         keyEl.onchange = updateKey;
         keyEl.onpaste = updateKey;
         keyEl.onkeydown = updateKey;
         nicknameEl.onchange = updateNick;
         nicknameEl.onpaste = updateNick;
         nicknameEl.onkeydown = updateNick;
+        soundcloudEl.onchange = updateSoundcloudKey;
+        soundcloudEl.onpaste = updateSoundcloudKey;
+        soundcloudEl.onkeydown = updateSoundcloudKey;
         dwsEl.onchange = () => {
             this.settings.disableWhenSpotify = dwsEl.value === "true";
             this.updateSettings();
@@ -3994,6 +4043,10 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
                 this.trackData.youtubeUrl ? {
                     label: "Listen on YouTube",
                     url: this.trackData.youtubeUrl
+                } : undefined,
+                this.trackData.soundcloudUrl ? {
+                    label: "Listen on Soundcloud",
+                    url: this.trackData.soundcloudUrl
                 } : undefined
             ].filter(b => !!b)
         });
