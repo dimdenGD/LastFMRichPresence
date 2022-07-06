@@ -1,8 +1,9 @@
 # LastFMRichPresence BetterDiscord Plugin
 This plugin allows you to show what you're listening via Last.fm. You can set it up for Soundcloud, Youtube Music and lot of other sites, not just Spotify (with [Webscrobbler](https://chrome.google.com/webstore/detail/web-scrobbler/hhinaapppaileiechjoiifaancjggfjm?hl=en)).  
-You can also set to not show Last.fm when you're listening from Spotify.  
+You can also set to not show Last.fm when you're listening from Spotify. Plugin will show 'Listen on YouTube' button if Last.fm provides YouTube link.  
+Keep in mind that you can't click your own Rich Presence buttons. Buttons works for other people though.   
   
-![Screenshot](https://lune.dimden.dev/429af1856e.png)  
+![Screenshot](https://lune.dimden.dev/4a48c3c3af.png)  
   
 ## Installation
 * Download [this](https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js) file and put it in BetterDiscord plugin folder.  
