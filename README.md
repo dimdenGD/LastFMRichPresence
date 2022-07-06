@@ -17,7 +17,7 @@ This plugin allows you to show what you're listening via Last.fm. You can set it
   
 ![Option menu](https://lune.dimden.dev/29fcedb94f.png)  
 
-### Will I get banned for using this?
+## Will I get banned for using this?
 This plugin uses RPC, which is official API used by lot of programs. It doesn't update your status and won't count as selfbotting.  
   
 ## Support
