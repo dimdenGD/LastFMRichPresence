@@ -3882,7 +3882,7 @@ class LastFMRichPresence {
                     trackData.youtubeUrl = await new Promise((resolve, reject) => {
                         // try getting youtube url
                         require('request').get(trackData.url, (error, response, body) => {
-                            if (error) return;
+                            if (error) return resolve(undefined);
                             let match = body.match(/data-youtube-url="(.*?)"/)?.[1];
                             resolve(match);
                         });
@@ -3891,31 +3891,33 @@ class LastFMRichPresence {
                         // try getting soundcloud url
                         trackData.soundcloudUrl = await new Promise((resolve, reject) => {
                             require('request').get({
-                                url: `https://api-v2.soundcloud.com/search?q=${(trackData?.album?.['#text'] ? `${trackData?.artist?.['#text']}%20-%20${trackData?.album?.['#text']}` : trackData?.artist?.['#text'])}%20-%20${trackData.name}&facet=model&limit=1&offset=0&linked_partitioning=1&app_version=1657010671&app_locale=en`,
+                                url: encodeURI(`https://api-v2.soundcloud.com/search?q=${(trackData?.album?.['#text'] ? `${trackData?.artist?.['#text']} - ${trackData?.album?.['#text']}` : trackData?.artist?.['#text'])} - ${trackData.name}&facet=model&limit=1&offset=0&linked_partitioning=1&app_version=1657010671&app_locale=en`),
                                 headers: {
                                     Authorization: this.settings?.soundcloudKey?.startsWith("OAuth ") ? this.settings?.soundcloudKey : `OAuth ${this.settings?.soundcloudKey}`
                                 }
                             }, (error, response, body) => {
-                                if (error) return;
+                                if (error) return resolve(undefined);
                                 try {
                                     body = JSON.parse(body);
                                 } catch (e) {
-                                    return;
+                                    return resolve(undefined);
                                 }
-                                if(!body.collection || body.collection?.length === 0) return;
+                                if(!body.collection || body.collection?.length === 0) return resolve(undefined);
                                 let coll = body.collection[0];
                                 if(coll.kind === "track") {
-                                    if(coll.title === trackData.name) {
+                                    if(coll.title.includes(trackData.name)) {
                                         resolve(coll.permalink_url);
                                     }
                                 } else if(coll.kind === "playlist") {
                                     let tracks = coll.tracks;
                                     for(let i = 0; i < tracks.length; i++) {
-                                        if(tracks[i].title === trackData.name) {
+                                        if(tracks[i].title.includes(trackData.name)) {
                                             resolve(tracks[i].permalink_url);
                                             break;
                                         }
                                     }
+                                } else {
+                                    resolve(undefined);
                                 }
                             });
                         });
@@ -4033,8 +4035,8 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
             details: this.trackData.name,
             state: this.trackData?.album?.['#text'] ? `${this.trackData?.artist?.['#text']} - ${this.trackData?.album?.['#text']}` : this.trackData?.artist?.['#text'],
             startTimestamp: Math.floor(this.startPlaying / 1000),
-            smallImageKey: "lastfm",
-            smallImageText: "Last.fm",
+            smallImageKey: this.trackData.youtubeUrl ? "youtube" : this.trackData.soundcloudUrl ? "soundcloud" : "lastfm",
+            smallImageText: this.trackData.youtubeUrl ? "YouTube" : this.trackData.soundcloudUrl ? "SoundCloud" : "Last.fm",
             buttons: [
                 {
                     label: "Open Last.fm",
