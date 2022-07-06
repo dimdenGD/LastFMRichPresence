@@ -3870,7 +3870,7 @@ class LastFMRichPresence {
             require("request").get(`http://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${this.settings.lastFMNickname}&api_key=${this.settings.lastFMKey}&format=json`, async (error, response, body) => {
                 if(error) {
                     console.error(e);
-                    BdApi.showToast("Last.fm returned error.", { type: "error" });
+                    // BdApi.showToast("Last.fm returned error.", { type: "error" });
                     return reject("Last.fm returned error.");
                 }
                 let res;
