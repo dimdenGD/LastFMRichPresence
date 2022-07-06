@@ -3896,6 +3896,7 @@ class LastFMRichPresence {
                                     Authorization: this.settings?.soundcloudKey?.startsWith("OAuth ") ? this.settings?.soundcloudKey : `OAuth ${this.settings?.soundcloudKey}`
                                 }
                             }, (error, response, body) => {
+                                console.log(error, body);
                                 if (error) return resolve(undefined);
                                 try {
                                     body = JSON.parse(body);
@@ -3916,9 +3917,9 @@ class LastFMRichPresence {
                                             break;
                                         }
                                     }
-                                } else {
-                                    resolve(undefined);
+
                                 }
+                                resolve(undefined);
                             });
                         });
                     }
