@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 0.0.4
+ * @version 0.1.0
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
@@ -66,10 +66,10 @@ const ClientID = "497515459474620417";
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "0.0.4",
+    version: "0.1.0",
     changelog: [
         {
-            title: "v0.0.4: 'Listen on Soundcloud'",
+            title: "v0.1.0: 'Listen on Soundcloud'",
             items: [
                 "You can set Soundcloud Authorization key and get 'Listen on Soundcloud' button when listening on Soundcloud.",
             ]
@@ -3795,7 +3795,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "0.0.4";
+        return "0.1.0";
     }
     getAuthor() {
         return "dimden#9900 (dimden.dev)";
@@ -3971,8 +3971,8 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         let nicknameEl = template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0];
         let dwsEl = template.content.firstElementChild.getElementsByClassName('disablewhenspotify')[0];
         let soundcloudEl = template.content.firstElementChild.getElementsByClassName('soundcloudkey')[0];
-        keyEl.value = this.settings.lastFMKey;
-        nicknameEl.value = this.settings.lastFMNickname;
+        keyEl.value = this.settings.lastFMKey ?? "";
+        nicknameEl.value = this.settings.lastFMNickname ?? "";
         soundcloudEl.value = this.settings.soundcloudKey ?? "";
         dwsEl.value = this.settings.disableWhenSpotify ? "true" : "false";
         let updateKey = () => {
