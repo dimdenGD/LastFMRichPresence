@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 0.0.2
+ * @version 0.0.3
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
@@ -63,16 +63,15 @@ SOFTWARE.
 */
 
 const ClientID = "497515459474620417";
-const validButtonURLRegex = /^http(s)?:\/\/[\w.-]+(?:\.[\w\.-]+)+[\w\-\._~:/?#[\]@!\$&'\(\)\*\+,;=.]+$/;
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "0.0.2",
+    version: "0.0.3",
     changelog: [
         {
-            title: "v0.0.2: Disable when Spotify",
+            title: "v0.0.3: 'Listen on YouTube'",
             items: [
-                "You can now disable Last.fm Rich Presence when you're playing music from Spotify.",
+                "Now it shows 'Listen on Youtube' button when it can find YouTube link.",
             ]
         }
     ]
@@ -3873,13 +3872,20 @@ class LastFMRichPresence {
                 try {
                     res = JSON.parse(body);
                 } catch (e) {
-                    reject(e);
-                    return;
+                    return reject(e);
                 }
                 let trackData = res.recenttracks?.track?.[0];
                 if (!trackData) return reject("Error getting track");
-                if (trackData.name !== this?.trackData?.name) {
+                trackData.youtubeUrl = this.trackData?.youtubeUrl;
+                if (trackData.name !== this.trackData?.name) {
                     this.startPlaying = Date.now();
+                    trackData.youtubeUrl = await new Promise((resolve, reject) => {
+                        require('request').get(trackData.url, (error, response, body) => {
+                            if (error) return undefined;
+                            let match = body.match(/data-youtube-url="(.*?)"/)?.[1];
+                            resolve(match);
+                        });
+                    });
                     setTimeout(() => this.updateRichPresence(), 50);
                 }
                 if (trackData?.['@attr']?.nowplaying) {
@@ -3968,7 +3974,7 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
         if(this.settings.disableWhenSpotify) {
             const activities = BdApi.findModuleByProps("getLocalPresence").getLocalPresence().activities;
             if(activities.find(a => a.name === "Spotify")) {
-                if(activities.find(a =>a.name === "some music")) {
+                if(activities.find(a => a.name === "some music")) {
                     this.client.clearPresence();
                 }
                 return;
@@ -3984,8 +3990,12 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
                 {
                     label: "Open Last.fm",
                     url: this.trackData.url
-                }
-            ]
+                },
+                this.trackData.youtubeUrl ? {
+                    label: "Listen on YouTube",
+                    url: this.trackData.youtubeUrl
+                } : undefined
+            ].filter(b => !!b)
         });
     }
     async _stopRichPresence() {
