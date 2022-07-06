@@ -3795,7 +3795,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "0.0.2";
+        return "0.0.3";
     }
     getAuthor() {
         return "dimden#9900 (dimden.dev)";
