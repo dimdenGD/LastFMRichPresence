@@ -12,9 +12,11 @@ This plugin allows you to show what you're listening via Last.fm. You can set it
   
 ## Installation
 * Download [this](https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js) file and put it in BetterDiscord plugin folder.  
-* Go to [Last.fm API](https://www.last.fm/api) and create API key (it only takes few minutes).  
+* Go to [Last.fm API](https://www.last.fm/api) and create API key (it only takes few minutes, write anything about app, dont need to provide callback or website).  
 * Put Last.fm key and your Last.fm username in plugin settings.  
 * Wait a minute and it should start working  
+* If it doesn't, make sure you have this option on:  
+![turn this on](https://media.discordapp.net/attachments/994325698397356203/994331512709324891/unknown.png)  
   
 ![Option menu](https://lune.dimden.dev/e88741e140.png)  
 
