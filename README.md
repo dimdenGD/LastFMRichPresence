@@ -16,7 +16,7 @@ This plugin allows you to show what you're listening via Last.fm. You can set it
 * Put Last.fm key and your Last.fm username in plugin settings.  
 * Wait a minute and it should start working  
   
-![Option menu](https://lune.dimden.dev/29fcedb94f.png)  
+![Option menu](https://lune.dimden.dev/e88741e140.png)  
 
 ## Getting Soundcloud Authorization key
 You can get OAuth key by having Soundcloud app (but they stopped giving access) or by going to [any search page](https://soundcloud.com/search?q=test), opening DevTools Network tab and finding `search?` request and copying `Authorization` header.  
