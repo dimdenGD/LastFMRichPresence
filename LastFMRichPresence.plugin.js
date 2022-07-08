@@ -3801,7 +3801,6 @@ class LastFMRichPresence {
         return "dimden#9900 (dimden.dev)";
     }
     async start() {
-        this.updateDataInterval = setInterval(() => this.updateData(), 16000);
         if (typeof window.ZeresPluginLibrary === "undefined") {
             try {
                 await this.askToDownloadZeresPluginLibrary();
@@ -3820,6 +3819,7 @@ class LastFMRichPresence {
         console.log("Starting LastFMRichPresence");
         window.ZeresPluginLibrary?.PluginUpdater?.checkForUpdate?.("LastFMRichPresence", changelog.version, "https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js");
         BdApi.showToast("LastFMRichPresence has started!");
+        this.updateDataInterval = setInterval(() => this.updateData(), 16000);
         this.settings = BdApi.loadData("LastFMRichPresence", "settings") || {};
         this.functionQueue = new FunctionQueue();
         this.rpcClientInfo = {};
@@ -3883,7 +3883,7 @@ class LastFMRichPresence {
                 if (!trackData) return reject("Error getting track");
                 trackData.youtubeUrl = this.trackData?.youtubeUrl;
                 if (trackData.name !== this.trackData?.name) {
-                    this.startPlaying = Date.now();
+                    this.startPlaying = Date.now() - 7500;
                     trackData.youtubeUrl = await new Promise((resolve, reject) => {
                         // try getting youtube url
                         require('request').get(trackData.url, (error, response, body) => {
