@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 0.1.0
+ * @version 0.1.1
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9900 (dimden.dev)
@@ -66,10 +66,10 @@ const ClientID = "497515459474620417";
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "0.1.0",
+    version: "0.1.1",
     changelog: [
         {
-            title: "v0.1.0: 'Listen on Soundcloud'",
+            title: "v0.1.1: 'Listen on Soundcloud'",
             items: [
                 "You can set Soundcloud Authorization key and get 'Listen on Soundcloud' button when listening on Soundcloud.",
             ]
@@ -3795,7 +3795,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "0.1.0";
+        return "0.1.1";
     }
     getAuthor() {
         return "dimden#9900 (dimden.dev)";
@@ -4064,7 +4064,6 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
     }
     async _startRichPresence() {
         this.client?.removeAllListeners?.();
-        this.client?.disconnect?.();
         this.client = RPClient(ClientID);
         this.client.on("setActivityFailed", e => {
             console.error(e);
@@ -4073,7 +4072,6 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         this.client.on("loginFailed", async e => {
             console.error(e);
             this.client?.removeAllListeners?.();
-            this.client?.disconnect?.();
             setTimeout(() => {
                 this.startRichPresence();
             }, 3000);
