@@ -3417,7 +3417,7 @@ let RPClient;
                 return new Promise((resolve, reject) => {
                     this.clientID = clientID;
                     this.options._login = options || {};
-                    const timeout = setTimeout(() => reject(new Error('RPC_CONNECTION_TIMEOUT')), 10e3);
+                    const timeout = setTimeout(() => reject(new Error('RPC_CONNECTION_TIMEOUT')), 10e3*2);
                     timeout.unref();
                     this.once('connected', () => {
                         clearTimeout(timeout);
