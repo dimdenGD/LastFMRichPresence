@@ -22,7 +22,7 @@ Keep in mind that you can't click your own rich presence buttons. Other people c
 ![Option menu](https://lune.dimden.dev/e88741e140.png)  
 
 ## Getting Soundcloud Authorization key
-You can get OAuth key by having Soundcloud app (but they stopped giving access) or by going to [any search page](https://soundcloud.com/search?q=test), opening DevTools Network tab and finding `search?` request and copying `Authorization` header.  
+You can get OAuth key by having Soundcloud app (but they stopped giving access) or by going to [any search page](https://soundcloud.com/search?q=test), opening DevTools Network tab and finding `search?` request and copying `Authorization` header (you have to be logged in & it doesn't matter if you include `OAuth ` part or not).  
   
 ![Soundcloud](https://lune.dimden.dev/d037357515.png)  
 ![Soundcloud2](https://lune.dimden.dev/56a2a124b5.png)  
