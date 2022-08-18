@@ -2,7 +2,7 @@
 This plugin allows you to show what you're listening via Last.fm. You can set it up for Soundcloud, Youtube Music and lot of other sites, not just Spotify (with [Webscrobbler](https://chrome.google.com/webstore/detail/web-scrobbler/hhinaapppaileiechjoiifaancjggfjm?hl=en)).  
 Keep in mind that you can't click your own rich presence buttons. Other people can.  
   
-![Screenshot](https://lune.dimden.dev/55c49cba7d.png)  
+![Screenshot](https://lune.dimden.dev/129c4eba56.png)  
   
 ## Features
 * Show what music you're listening with Last.fm. With [Webscrobbler](https://chrome.google.com/webstore/detail/web-scrobbler/hhinaapppaileiechjoiifaancjggfjm?hl=en) you can show music from 280+ different websites (see list [here](https://web-scrobbler.com/)).  
