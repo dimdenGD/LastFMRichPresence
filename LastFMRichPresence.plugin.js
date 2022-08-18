@@ -69,9 +69,9 @@ const changelog = {
     version: "1.0.0",
     changelog: [
         {
-            title: "v1.0.0: 'Listen on Soundcloud'",
+            title: "v1.0.0: 'Images!'",
             items: [
-                "You can set Soundcloud Authorization key and get 'Listen on Soundcloud' button when listening on Soundcloud.",
+                "Plugin will now show song image (didn't know you can do that).",
             ]
         }
     ]
