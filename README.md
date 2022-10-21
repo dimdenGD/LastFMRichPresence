@@ -1,4 +1,4 @@
-# Plugin broke cannot be fixed because of latest Discord updates.
+# Plugin broke and cannot be fixed because of latest Discord updates.
 # RIP
 # RIP
 
