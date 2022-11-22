@@ -148,16 +148,7 @@ class LastFMRichPresence {
     }
     async start() {
         if (typeof window.ZeresPluginLibrary === "undefined") {
-            try {
-                await this.askToDownloadZeresPluginLibrary();
-                // Wait for ZeresPluginLibrary to load if it didn't load yet
-                while (typeof window.ZeresPluginLibrary === "undefined") {
-                    await this.delay(500);
-                }
-            } catch (e) {
-                console.error(e);
-                return BdApi.showToast('LastFMRichPresence: "ZeresPluginLibrary" was not downloaded, or the download failed. This plugin cannot start.', { type: "error" });
-            }
+            return BdApi.showToast('LastFMRichPresence: "ZeresPluginLibrary" plugin required. This plugin cannot start.', { type: "error" });
         }
         this.initialize();
     }
@@ -418,31 +409,6 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
     
     updateSettings() {
         BdApi.saveData("LastFMRichPresence", "settings", this.settings);
-    }
-    askToDownloadZeresPluginLibrary() {
-        return new Promise((resolve, reject) => {
-            BdApi.showConfirmationModal("Library Missing", `The library plugin needed for ${this.constructor.name} is missing. Please click Download Now to install it.`, {
-                confirmText: "Download Now",
-                cancelText: "Cancel",
-                onConfirm: () => {
-                    require("request").get("https://rauenzi.github.io/BDPluginLibrary/release/0PluginLibrary.plugin.js", async (error, response, body) => {
-                        if (error) {
-                            console.error(error);
-                            require("electron").shell.openExternal("https://betterdiscord.net/ghdl?url=https://raw.githubusercontent.com/rauenzi/BDPluginLibrary/master/release/0PluginLibrary.plugin.js");
-                            return reject();
-                        }
-                        try {
-                            await new Promise(r => require("fs").writeFile(require("path").join(BdApi.Plugins.folder, "0PluginLibrary.plugin.js"), body, r));
-                            resolve();
-                        } catch (e) {
-                            console.error(`${this.constructor.name}: `, e);
-                            reject();
-                        }
-                    });
-                },
-                onCancel: reject
-            });
-        });
     }
     delay(ms) {
         return new Promise(resolve => {
