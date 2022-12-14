@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.1
+ * @version 1.0.2
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
@@ -79,16 +79,16 @@ SOFTWARE.
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-const ClientID = "497515459474620417";
+const ClientID = "1052565934088405062";
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "1.0.1",
+    version: "1.0.2",
     changelog: [
         {
-            title: "v1.0.1: 'Fixed!'",
+            title: "v1.0.2: 'Fixed 2!'",
             items: [
-                "Finally plugin was fixed!",
+                "Fixed again.",
             ]
         }
     ]
@@ -141,7 +141,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "1.0.1";
+        return "1.0.2";
     }
     getAuthor() {
         return "dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)";
