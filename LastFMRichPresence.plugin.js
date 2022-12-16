@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.2
+ * @version 1.0.3
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
@@ -83,12 +83,12 @@ const ClientID = "1052565934088405062";
 
 const changelog = {
     title: "LastFMRichPresence Update",
-    version: "1.0.2",
+    version: "1.0.3",
     changelog: [
         {
-            title: "v1.0.2: 'Fixed 2!'",
+            title: "v1.0.3",
             items: [
-                "Fixed again.",
+                "Fixed useless API call and made polling more frequent (16s -> 10s) since limit is much lower.",
             ]
         }
     ]
@@ -141,7 +141,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
     }
     getVersion() {
-        return "1.0.2";
+        return "1.0.3";
     }
     getAuthor() {
         return "dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)";
@@ -156,7 +156,7 @@ class LastFMRichPresence {
         console.log("Starting LastFMRichPresence");
         window.ZeresPluginLibrary?.PluginUpdater?.checkForUpdate?.("LastFMRichPresence", changelog.version, "https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js");
         BdApi.showToast("LastFMRichPresence has started!");
-        this.updateDataInterval = setInterval(() => this.updateData(), 16000);
+        this.updateDataInterval = setInterval(() => this.updateData(), 10000);
         this.settings = BdApi.loadData("LastFMRichPresence", "settings") || {};
         this.getLocalPresence = BdApi.findModuleByProps("getLocalPresence").getLocalPresence;
         this.rpc = BdApi.findModuleByProps("dispatch", "_subscriptions");
@@ -222,7 +222,7 @@ class LastFMRichPresence {
                 if (!trackData) return reject("Error getting track");
                 trackData.youtubeUrl = this.trackData?.youtubeUrl;
                 if (trackData.name !== this.trackData?.name) {
-                    this.startPlaying = Date.now() - 7500;
+                    this.startPlaying = Date.now() - 5000;
                     trackData.youtubeUrl = await new Promise((resolve, reject) => {
                         // try getting youtube url
                         require('request').get(trackData.url, (error, response, body) => {
@@ -401,7 +401,7 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         
         if(this.trackData?.image?.[1]?.['#text']) {
             obj.assets.large_image = await this.getAsset(this.trackData?.image?.[1]?.['#text']);
-            obj.assets.large_text = await this.getAsset(this.trackData.name);
+            obj.assets.large_text = this.trackData.name;
         }
 
         this.setActivity(obj);
