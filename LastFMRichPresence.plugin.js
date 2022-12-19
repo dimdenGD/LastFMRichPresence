@@ -1,7 +1,7 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.3
- * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.
+ * @version 1.0.4
+ * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify!
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
  * @authorLink https://dimden.dev/
@@ -81,26 +81,6 @@ SOFTWARE.
 
 const ClientID = "1052565934088405062";
 
-const changelog = {
-    title: "LastFMRichPresence Update",
-    version: "1.0.3",
-    changelog: [
-        {
-            title: "v1.0.3",
-            items: [
-                "Fixed useless API call and made polling more frequent (16s -> 10s) since limit is much lower.",
-            ]
-        }
-    ]
-};
-
-function versionCompare(a, b) {
-    a = a.toLowerCase().split(/[.-]/).map(x => /\d/.test(x[0]) ? x.padStart(10, "0") : x.padEnd(10, "0")).join("");
-    b = b.toLowerCase().split(/[.-]/).map(x => /\d/.test(x[0]) ? x.padStart(10, "0") : x.padEnd(10, "0")).join("");
-    if (a === b) return 0;
-    return (a < b) ? -1 : 1;
-}
-
 function isURL(url) {
     try {
         new URL(url);
@@ -138,40 +118,32 @@ class LastFMRichPresence {
         return "LastFMRichPresence";
     }
     getDescription() {
-        return "Last.fm presence to show what you're listening to. Finally not just Spotify! Check out the [plugin's homepage](https://github.com/dimdenGD/LastFMRichPresence/) to see how to make it work.";
+        return "Last.fm presence to show what you're listening to. Finally not just Spotify!";
     }
     getVersion() {
-        return "1.0.3";
+        return "1.0.4";
     }
     getAuthor() {
         return "dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)";
     }
     async start() {
-        if (typeof window.ZeresPluginLibrary === "undefined") {
-            return BdApi.showToast('LastFMRichPresence: "ZeresPluginLibrary" plugin required. This plugin cannot start.', { type: "error" });
-        }
         this.initialize();
     }
     initialize() {
         console.log("Starting LastFMRichPresence");
-        window.ZeresPluginLibrary?.PluginUpdater?.checkForUpdate?.("LastFMRichPresence", changelog.version, "https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js");
         BdApi.showToast("LastFMRichPresence has started!");
-        this.updateDataInterval = setInterval(() => this.updateData(), 10000);
+        this.updateDataInterval = setInterval(() => this.updateData(), 20000); // i hope 20 seconds is enough
         this.settings = BdApi.loadData("LastFMRichPresence", "settings") || {};
         this.getLocalPresence = BdApi.findModuleByProps("getLocalPresence").getLocalPresence;
         this.rpc = BdApi.findModuleByProps("dispatch", "_subscriptions");
         this.rpcClientInfo = {};
         this.discordSetActivityHandler = null;
         this.paused = false;
-        if (!this.settings.lastChangelogVersionSeen || versionCompare(changelog.version, this.settings.lastChangelogVersionSeen) === 1) {
-            window.ZeresPluginLibrary.Modals.showChangelogModal(changelog.title, changelog.version, changelog.changelog);
-            this.settings.lastChangelogVersionSeen = changelog.version;
-            this.updateSettings();
-        }
         if (this.settings.lastFMKey && this.settings.lastFMNickname) {
             this.updateRichPresence();
         }
         this.initialized = true;
+        this.request = require("request");
     }
     async stop() {
         clearInterval(this.updateDataInterval);
@@ -192,9 +164,16 @@ class LastFMRichPresence {
     }
     async updateData() {
         if (!this.initialized || !this.settings.lastFMKey || !this.settings.lastFMNickname) return;
-        let data;
+
+        if(this.settings.disableWhenSpotify) {
+            const activities = this.getLocalPresence().activities;
+            if(activities.find(a => a.name === "Spotify")) {
+                return;
+            }
+        }
+
         try {
-            data = await this.getLastFmData();
+            await this.getLastFmData();
         } catch (e) {
             console.error(e);
             return;
@@ -206,10 +185,9 @@ class LastFMRichPresence {
                 reject("No last.fm API key or username set");
                 return;
             }
-            require("request").get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${this.settings.lastFMNickname}&api_key=${this.settings.lastFMKey}&format=json`, async (error, response, body) => {
+            this.request.get(`https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${this.settings.lastFMNickname}&api_key=${this.settings.lastFMKey}&format=json`, async (error, response, body) => {
                 if(error) {
                     console.error(error);
-                    // BdApi.showToast("Last.fm returned error.", { type: "error" });
                     return reject("Last.fm returned error.");
                 }
                 let res;
@@ -222,10 +200,10 @@ class LastFMRichPresence {
                 if (!trackData) return reject("Error getting track");
                 trackData.youtubeUrl = this.trackData?.youtubeUrl;
                 if (trackData.name !== this.trackData?.name) {
-                    this.startPlaying = Date.now() - 5000;
+                    this.startPlaying = Date.now() - 10000;
                     trackData.youtubeUrl = await new Promise((resolve, reject) => {
                         // try getting youtube url
-                        require('request').get(trackData.url, (error, response, body) => {
+                        this.request.get(trackData.url, (error, response, body) => {
                             if (error) return resolve(undefined);
                             let match = body.match(/data-youtube-url="(.*?)"/)?.[1];
                             resolve(match);
@@ -234,7 +212,7 @@ class LastFMRichPresence {
                     if(!trackData.youtubeUrl && this.settings.soundcloudKey) {
                         // try getting soundcloud url
                         trackData.soundcloudUrl = await new Promise((resolve, reject) => {
-                            require('request').get({
+                            this.request.get({
                                 url: encodeURI(`https://api-v2.soundcloud.com/search?q=${(trackData?.album?.['#text'] ? `${trackData?.artist?.['#text']} - ${trackData?.album?.['#text']}` : trackData?.artist?.['#text'])} - ${trackData.name}&facet=model&limit=1&offset=0&linked_partitioning=1&app_version=1657010671&app_locale=en`),
                                 headers: {
                                     Authorization: this.settings?.soundcloudKey?.startsWith("OAuth ") ? this.settings?.soundcloudKey : `OAuth ${this.settings?.soundcloudKey}`
@@ -288,27 +266,27 @@ class LastFMRichPresence {
     getSettingsPanel() {
         this.settings = BdApi.loadData("LastFMRichPresence", "settings") || {};
         let template = document.createElement("template");
-        template.innerHTML = `<div style="color: var(--header-primary); font-size: 16px; font-weight: 300; white-space: pre; line-height: 22px;">
-<b>Last.fm key</b>
-<span>Input your Last.fm API key. You can create it <a href="https://www.last.fm/api" target="_blank">here</a> in few minutes.</span><br>
+        template.innerHTML = `<div style="color: var(--header-primary);font-size: 16px;font-weight: 300;line-height: 22px;max-width: 550px;margin-top: 17px;">
+<b>Last.fm key</b><br>
+<span>Input your Last.fm API key. You can create it <a href="https://www.last.fm/api/account/create" target="_blank">here</a> in a minute.</span><br>
+<span>To create API key write anything you want about app, you don't need to provide callback or homepage.</span><br><br>
 <input class="lastfmkey inputDefault-3FGxgL input-2g-os5" placeholder="last.fm key" style="width:80%">
-<br>
-<b>Last.fm Username</b>
-<span>Input your Last.fm username.</span><br>
+<br><br>
+<b>Last.fm Username</b><br>
+<span>Input your Last.fm username.</span><br><br>
 <input class="lastfmnickname inputDefault-3FGxgL input-2g-os5" placeholder="last.fm username" style="width:80%">
-<br>
-<b>Disable RPC when Spotify is playing</b>
-<span>Disables Rich Presence when you play music from Spotify.
-Useful when you want Last.fm to show when you listen to other sources but not Spotify.</span><br>
+<br><br>
+<b>Disable RPC when Spotify is playing</b><br>
+<span>Disables Rich Presence when you play music from Spotify.<br>
+Useful when you want Last.fm to show when you listen to other sources but not Spotify.</span><br><br>
 <select class="disablewhenspotify inputDefault-3FGxgL input-2g-os5" style="width:80%">
     <option value="false">OFF</option>
     <option value="true">ON</option>
 </select>
-<br>
-<b>Soundcloud Button</b>
-(OPTIONAL)
-Show 'Listen on Soundcloud' button in the RP when listening from Soundcloud.
-Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_blank">homepage</a> for info about getting this field.<br>
+<br><br>
+<b>Soundcloud Button</b> (OPTIONAL)<br>
+Show 'Listen on Soundcloud' button in the RP when listening from Soundcloud.<br>
+Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_blank">homepage</a> for info about getting this field.<br><br>
 <input class="soundcloudkey inputDefault-3FGxgL input-2g-os5" placeholder="Soundcloud Authorization key" style="width:80%">
 </div>`;
         let keyEl = template.content.firstElementChild.getElementsByClassName('lastfmkey')[0];
@@ -351,7 +329,7 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         this.paused = false;
     }
     setActivity(activity) {
-        let obj = activity && Object.assign(activity, { flags:  1 << 0, type: 0 });
+        let obj = activity && Object.assign(activity, { flags: 1, type: 0 });
         console.log(obj);
         this.rpc.dispatch({
             type: "LOCAL_ACTIVITY_UPDATE",
