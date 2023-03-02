@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.4
+ * @version 1.0.5
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify!
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
@@ -270,16 +270,23 @@ class LastFMRichPresence {
 <b>Last.fm key</b><br>
 <span>Input your Last.fm API key. You can create it <a href="https://www.last.fm/api/account/create" target="_blank">here</a> in a minute.</span><br>
 <span>To create API key write anything you want about app, you don't need to provide callback or homepage.</span><br><br>
-<input class="lastfmkey inputDefault-3FGxgL input-2g-os5" placeholder="last.fm key" style="width:80%">
+<input class="lastfmkey inputDefault-Ciwd-S input-3O04eu" placeholder="last.fm key" style="width:80%">
 <br><br>
 <b>Last.fm Username</b><br>
 <span>Input your Last.fm username.</span><br><br>
-<input class="lastfmnickname inputDefault-3FGxgL input-2g-os5" placeholder="last.fm username" style="width:80%">
+<input class="lastfmnickname inputDefault-Ciwd-S input-3O04eu" placeholder="last.fm username" style="width:80%">
 <br><br>
 <b>Disable RPC when Spotify is playing</b><br>
 <span>Disables Rich Presence when you play music from Spotify.<br>
 Useful when you want Last.fm to show when you listen to other sources but not Spotify.</span><br><br>
-<select class="disablewhenspotify inputDefault-3FGxgL input-2g-os5" style="width:80%">
+<select class="disablewhenspotify inputDefault-Ciwd-S input-3O04eu" style="width:80%">
+    <option value="false">OFF</option>
+    <option value="true">ON</option>
+</select>
+<br><br>
+<b>Use "Listening to" instead of "Playing"</b><br>
+<span>Will show "Listening to" text in your activity, you're not really supposed to do this so it's disabled by default.</span><br><br>
+<select class="listeningto inputDefault-Ciwd-S input-3O04eu" style="width:80%">
     <option value="false">OFF</option>
     <option value="true">ON</option>
 </select>
@@ -287,16 +294,18 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
 <b>Soundcloud Button</b> (OPTIONAL)<br>
 Show 'Listen on Soundcloud' button in the RP when listening from Soundcloud.<br>
 Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_blank">homepage</a> for info about getting this field.<br><br>
-<input class="soundcloudkey inputDefault-3FGxgL input-2g-os5" placeholder="Soundcloud Authorization key" style="width:80%">
+<input class="soundcloudkey inputDefault-Ciwd-S input-3O04eu" placeholder="Soundcloud Authorization key" style="width:80%">
 </div>`;
         let keyEl = template.content.firstElementChild.getElementsByClassName('lastfmkey')[0];
         let nicknameEl = template.content.firstElementChild.getElementsByClassName('lastfmnickname')[0];
         let dwsEl = template.content.firstElementChild.getElementsByClassName('disablewhenspotify')[0];
+        let listeningEl = template.content.firstElementChild.getElementsByClassName('listeningto')[0];
         let soundcloudEl = template.content.firstElementChild.getElementsByClassName('soundcloudkey')[0];
         keyEl.value = this.settings.lastFMKey ?? "";
         nicknameEl.value = this.settings.lastFMNickname ?? "";
         soundcloudEl.value = this.settings.soundcloudKey ?? "";
         dwsEl.value = this.settings.disableWhenSpotify ? "true" : "false";
+        listeningEl.value = this.settings.listeningTo ? "true" : "false";
         let updateKey = () => {
             this.settings.lastFMKey = keyEl.value;
             this.updateSettings();
@@ -322,6 +331,10 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
             this.settings.disableWhenSpotify = dwsEl.value === "true";
             this.updateSettings();
         };
+        listeningEl.onchange = () => {
+            this.settings.listeningTo = listeningEl.value === "true";
+            this.updateSettings();
+        };
 
         return template.content.firstElementChild;
     }
@@ -329,7 +342,7 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         this.paused = false;
     }
     setActivity(activity) {
-        let obj = activity && Object.assign(activity, { flags: 1, type: 0 });
+        let obj = activity && Object.assign(activity, { flags: 1, type: this.settings.listeningTo ? 2 : 0 });
         console.log(obj);
         this.rpc.dispatch({
             type: "LOCAL_ACTIVITY_UPDATE",
