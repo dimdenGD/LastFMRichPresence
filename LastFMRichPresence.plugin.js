@@ -81,6 +81,16 @@ SOFTWARE.
 
 const ClientID = "1052565934088405062";
 
+const defaultSettings = {
+	disableWhenSpotify: true,
+	listeningTo: false,
+	artistActivityName: false,
+	lastfmButton: true,
+	youtubeButton: true,
+	assetIcon: true,
+	artistBeforeAlbum: true
+};
+
 function isURL(url) {
     try {
         new URL(url);
@@ -134,6 +144,12 @@ class LastFMRichPresence {
         BdApi.showToast("LastFMRichPresence has started!");
         this.updateDataInterval = setInterval(() => this.updateData(), 20000); // i hope 20 seconds is enough
         this.settings = BdApi.loadData("LastFMRichPresence", "settings") || {};
+	for (const setting of Object.keys(defaultSettings)) {
+		if (typeof this.settings[setting] === "undefined") {
+			this.settings[setting] = defaultSettings[setting];
+		}
+		this.updateSettings();
+	}
         this.getLocalPresence = BdApi.findModuleByProps("getLocalPresence").getLocalPresence;
         this.rpc = BdApi.findModuleByProps("dispatch", "_subscriptions");
         this.rpcClientInfo = {};
