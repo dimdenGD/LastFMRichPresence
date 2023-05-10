@@ -2,8 +2,6 @@
 This plugin allows you to show what you're listening via Last.fm. You can set it up for Soundcloud, Youtube Music and lot of other sites, not just Spotify (with [Webscrobbler](https://chrome.google.com/webstore/detail/web-scrobbler/hhinaapppaileiechjoiifaancjggfjm?hl=en)).  
 Keep in mind that you can't click your own rich presence buttons. Other people can.  
 
-**Install https://betterdiscord.app/plugin/ZeresPluginLibrary before this plugin**
-
 ![Screenshot](https://lune.dimden.dev/129c4eba56.png)  
 
 ## Features
