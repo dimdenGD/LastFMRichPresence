@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.5
+ * @version 1.0.6
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify!
  * @website https://discord.gg/TBAM6T7AYc
  * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
