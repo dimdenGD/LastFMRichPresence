@@ -389,7 +389,7 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         ytbtnEl.value = this.settings.youtubeButton ? "true" : "false";
         assetEl.value = this.settings.assetIcon ? "true" : "false";
         artistbeforeEl.value = this.settings.artistBeforeAlbum ? "true" : "false";
-        disableactEl.value = this.settings.artistBeforeAlbum ? "true" : "false";
+        disableactEl.value = this.settings.disableWhenActivity ? "true" : "false";
         let updateKey = () => {
             this.settings.lastFMKey = keyEl.value;
             this.updateSettings();
