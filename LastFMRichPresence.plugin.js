@@ -185,7 +185,7 @@ class LastFMRichPresence {
         if(this.settings.disableWhenSpotify) {
             const activities = this.getLocalPresence().activities;
             if(activities.find(a => a.name === "Spotify")) {
-                if(activities.find(a => a.name === (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
+                if(activities.find(a => a.application_id === ClientID)) {
                     this.setActivity({});
                 }
                 return;
@@ -193,9 +193,9 @@ class LastFMRichPresence {
         }
 		if(this.settings.disableWhenActivity) {
             const activities = this.getLocalPresence().activities;
-            if(activities.find(a => a.name !== (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
-                if(activities.find(a => a.name === (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
-                    this.setActivity({});
+            if(activities.filter(a => a.application_id !== ClientID).length) {
+                if(activities.find(a => a.application_id === ClientID)) {
+					this.setActivity({});
                 }
                 return;
             }
