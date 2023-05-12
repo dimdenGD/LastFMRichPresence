@@ -88,7 +88,8 @@ const defaultSettings = {
 	lastfmButton: true,
 	youtubeButton: true,
 	assetIcon: true,
-	artistBeforeAlbum: true
+	artistBeforeAlbum: true,
+	disableWhenActivity: false
 };
 
 function isURL(url) {
@@ -131,7 +132,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify!";
     }
     getVersion() {
-        return "1.0.4";
+        return "1.0.6";
     }
     getAuthor() {
         return "dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)";
@@ -184,6 +185,18 @@ class LastFMRichPresence {
         if(this.settings.disableWhenSpotify) {
             const activities = this.getLocalPresence().activities;
             if(activities.find(a => a.name === "Spotify")) {
+                if(activities.find(a => a.name === (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
+                    this.setActivity({});
+                }
+                return;
+            }
+        }
+		if(this.settings.disableWhenActivity) {
+            const activities = this.getLocalPresence().activities;
+            if(activities.find(a => a.name !== (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
+                if(activities.find(a => a.name === (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
+                    this.setActivity({});
+                }
                 return;
             }
         }
@@ -300,6 +313,14 @@ Useful when you want Last.fm to show when you listen to other sources but not Sp
     <option value="true">ON</option>
 </select>
 <br><br>
+<b>Disable RPC when any other activity is detected</b><br>
+<span>Disables Rich Presence when any other activity is detected.<br>
+Useful when you only want to show your Last.fm status when you're not playing games.</span><br><br>
+<select class="disablewhenactivity inputDefault-Ciwd-S input-3O04eu" style="width:80%">
+    <option value="false">OFF</option>
+    <option value="true">ON</option>
+</select>
+<br><br>
 <b>Use "Listening to" instead of "Playing"</b><br>
 <span>Will show "Listening to" text in your activity, you're not really supposed to do this so it's disabled by default.</span><br><br>
 <select class="listeningto inputDefault-Ciwd-S input-3O04eu" style="width:80%">
@@ -357,6 +378,7 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
 		let ytbtnEl = template.content.firstElementChild.getElementsByClassName('ytbutton')[0];
 		let assetEl = template.content.firstElementChild.getElementsByClassName('asseticon')[0];
 		let artistbeforeEl = template.content.firstElementChild.getElementsByClassName('artistbeforealbum')[0];
+		let disableactEl = template.content.firstElementChild.getElementsByClassName('disablewhenactivity')[0];
         keyEl.value = this.settings.lastFMKey ?? "";
         nicknameEl.value = this.settings.lastFMNickname ?? "";
         soundcloudEl.value = this.settings.soundcloudKey ?? "";
@@ -366,7 +388,8 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
         lastbtnEl.value = this.settings.lastfmButton ? "true" : "false";
         ytbtnEl.value = this.settings.youtubeButton ? "true" : "false";
         assetEl.value = this.settings.assetIcon ? "true" : "false";
-		artistbeforeEl.value = this.settings.artistBeforeAlbum ? "true" : "false";
+        artistbeforeEl.value = this.settings.artistBeforeAlbum ? "true" : "false";
+        disableactEl.value = this.settings.artistBeforeAlbum ? "true" : "false";
         let updateKey = () => {
             this.settings.lastFMKey = keyEl.value;
             this.updateSettings();
@@ -416,6 +439,10 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
             this.settings.artistBeforeAlbum = artistbeforeEl.value === "true";
             this.updateSettings();
         };
+		disableactEl.onchange = () => {
+            this.settings.disableWhenActivity = disableactEl.value === "true";
+            this.updateSettings();
+        };
 
         return template.content.firstElementChild;
     }
@@ -433,15 +460,6 @@ Please visit <a href="https://github.com/dimdenGD/LastFMRichPresence" target="_b
     async updateRichPresence() {
         if (this.paused || !this.trackData?.name) {
             return;
-        }
-        if(this.settings.disableWhenSpotify) {
-            const activities = this.getLocalPresence().activities;
-            if(activities.find(a => a.name === "Spotify")) {
-                if(activities.find(a => a.name === (this.settings.artistActivityName && this.trackData.artist['#text']) ? this.trackData.artist['#text'] : "some music")) {
-                    this.setActivity({});
-                }
-                return;
-            }
         }
         let button_urls = [], buttons = [];
         if(this.settings.lastfmButton && this.trackData.url && isURL(this.trackData.url)) {
