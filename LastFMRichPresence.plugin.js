@@ -116,7 +116,7 @@ class LastFMRichPresence {
         let getAsset;
         for (const key in assetManager) {
             const member = assetManager[key];
-            if (member.toString().includes("apply(")) {
+            if (member.toString().includes("APPLICATION_ASSETS_FETCH")) {
                 getAsset = member;
                 break;
             }
