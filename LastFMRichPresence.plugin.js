@@ -132,7 +132,7 @@ class LastFMRichPresence {
         return "Last.fm presence to show what you're listening to. Finally not just Spotify!";
     }
     getVersion() {
-        return "1.0.6";
+        return "1.0.7";
     }
     getAuthor() {
         return "dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)";
