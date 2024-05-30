@@ -3,7 +3,7 @@
  * @version 1.0.8
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify!
  * @website https://discord.gg/TBAM6T7AYc
- * @author dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)
+ * @author dimden, dzshn, __snaake
  * @authorLink https://dimden.dev/
  * @updateUrl https://raw.githubusercontent.com/dimdenGD/LastFMRichPresence/main/LastFMRichPresence.plugin.js
  * @source https://github.com/dimdenGD/LastFMRichPresence/blob/main/LastFMRichPresence.plugin.js
@@ -362,7 +362,7 @@ class Constants {
     }
   
     getAuthor() {
-      return 'dimden#9999 (dimden.dev), dzshn#1312 (dzshn.xyz)';
+      return 'dimden, dzshn, __snaake';
     }
   
     async start() {
