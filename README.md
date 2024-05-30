@@ -17,7 +17,7 @@ Keep in mind that you can't click your own rich presence buttons. Other people c
 * Put Last.fm key and your Last.fm username in plugin settings.  
 * Wait a minute and it should start working  
 * If it doesn't, make sure you have this option on:  
-![turn this on](https://media.discordapp.net/attachments/994325698397356203/994331512709324891/unknown.png)  
+![turn this on](https://lune.dimden.dev/808d593dd92d.png)  
 
 ![Option menu](https://lune.dimden.dev/e88741e140.png)  
 
