@@ -522,9 +522,10 @@ class Constants {
           start: Date.now(),
         };
       }
-  
+
+      activity.assets = {};
+
       if (this.settings.assetIcon) {
-        activity.assets = {};
         activity.assets.small_image = await Switches.getSmallImage(
           this.trackData
         );
