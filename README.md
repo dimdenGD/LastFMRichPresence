@@ -2,6 +2,8 @@
 This plugin allows you to show what you're listening via Last.fm. You can set it up for Soundcloud, Youtube Music and lot of other sites, not just Spotify (with [Webscrobbler](https://chrome.google.com/webstore/detail/web-scrobbler/hhinaapppaileiechjoiifaancjggfjm?hl=en)).  
 Keep in mind that you can't click your own rich presence buttons. Other people can.  
 
+> This plugin is no longer maintained.
+
 ![Screenshot](https://lune.dimden.dev/129c4eba56.png)  
 
 ## Features
@@ -29,9 +31,6 @@ You can get OAuth key by having Soundcloud app (but they stopped giving access) 
 
 ## Will I get banned for using this?
 This plugin uses RPC, which is official API used by lot of programs. It doesn't update your status and won't count as selfbotting.  
-
-## Support
-Join my [Discord server](https://discord.gg/TBAM6T7AYc) for support.  
 
 ## License
 MIT
