@@ -140,11 +140,11 @@ class Constants {
   
   class SettingsManager {
     static getSettings() {
-      return BdApi.loadData('LastFMRichPresence', 'settings') || {};
+      return BdApi.Data.load('LastFMRichPresence', 'settings') || {};
     }
   
     static updateSettings(settings) {
-      BdApi.saveData('LastFMRichPresence', 'settings', settings);
+      BdApi.Data.save('LastFMRichPresence', 'settings', settings);
     }
   
     static initializeEmptySettings() {
@@ -163,7 +163,7 @@ class Constants {
   
     static getRPCManager() {
       if (!RPCManager._instance) {
-        RPCManager._instance = BdApi.findModuleByProps(
+        RPCManager._instance = BdApi.Webpack.getByKeys(
           'dispatch',
           '_subscriptions'
         );
@@ -344,7 +344,7 @@ class Constants {
       this.updateDataInterval = 0;
       this.timeoutPlaying;
       this.getLocalPresence =
-        BdApi.findModuleByProps('getLocalPresence').getLocalPresence;
+        BdApi.Webpack.getByKeys('getLocalPresence').getLocalPresence;
     }
   
     getName() {
@@ -370,7 +370,7 @@ class Constants {
     initialize() {
       SettingsManager.initializeEmptySettings();
       if (!this.settings.lastFMKey || !this.settings.lastFMNickname) {
-        BdApi.showToast(Constants.getSomeLastFmSettingMissing());
+        BdApi.Ui.showToast(Constants.getSomeLastFmSettingMissing());
         return;
       }
       this.updateDataInterval = setInterval(
