@@ -1,6 +1,6 @@
 /**
  * @name LastFMRichPresence
- * @version 1.0.8
+ * @version 1.0.9
  * @description Last.fm rich presence to show what you're listening to. Finally not just Spotify!
  * @author dimden, dzshn, __snaake
  * @authorLink https://dimden.dev/
@@ -356,7 +356,7 @@ class Constants {
     }
   
     getVersion() {
-      return '1.0.8';
+      return '1.0.9';
     }
   
     getAuthor() {
@@ -370,7 +370,7 @@ class Constants {
     initialize() {
       SettingsManager.initializeEmptySettings();
       if (!this.settings.lastFMKey || !this.settings.lastFMNickname) {
-        BdApi.Ui.showToast(Constants.getSomeLastFmSettingMissing());
+        BdApi.UI.showToast(Constants.getSomeLastFmSettingMissing());
         return;
       }
       this.updateDataInterval = setInterval(
