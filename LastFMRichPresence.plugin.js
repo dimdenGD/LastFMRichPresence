@@ -112,29 +112,24 @@ class Constants {
   
     static getFromAssetManger() {
       if (!AssetManager._instance) {
-        let filter = BdApi.Webpack.Filters.byStrings(
-          'getAssetImage: size must === [number, number] for Twitch'
+          const module = BdApi.Webpack.getModule(m => 
+          Object.values(m).some(v => typeof v === "function" && v.toString().includes("APPLICATION_ASSETS_FETCH")),
+          { first: true }
         );
-        let assetManager = BdApi.Webpack.getModule(
-          (m) => typeof m === 'object' && Object.values(m).some(filter)
-        );
-        for (const key in assetManager) {
-          const member = assetManager[key];
-          if (member.toString().includes('APPLICATION_ASSETS_FETCH')) {
-            AssetManager._instance = member;
-          }
+
+        if (module) {
+          AssetManager._instance = Object.values(module).find(v => 
+            typeof v === "function" && v.toString().includes("APPLICATION_ASSETS_FETCH")
+          );
         }
       }
       return AssetManager._instance;
     }
   
     static async getAsset(key) {
-      return (
-        await AssetManager.getFromAssetManger()(Constants.getClientID(), [
-          key,
-          undefined,
-        ])
-      )[0];
+      const fetcher = AssetManager.getFromAssetManger();
+      const assets = await fetcher(Constants.getClientID(), [key, undefined]);
+      return assets && assets.length > 0 ? assets[0] : null;
     }
   }
   
@@ -163,9 +158,9 @@ class Constants {
   
     static getRPCManager() {
       if (!RPCManager._instance) {
-        RPCManager._instance = BdApi.Webpack.getByKeys(
-          'dispatch',
-          '_subscriptions'
+        RPCManager._instance = BdApi.Webpack.getModule(
+          (m) => m.dispatch && m.subscribe && m._subscriptions,
+          { searchExports: true }
         );
       }
       return RPCManager._instance;
@@ -232,7 +227,7 @@ class Constants {
   
   class Requests {
     static async getCurrentScrobble() {
-      const res = await fetch(
+      const res = await BdApi.Net.fetch(
         `https://ws.audioscrobbler.com/2.0/?method=user.getrecenttracks&user=${
           SettingsManager.getSettings().lastFMNickname
         }&api_key=${SettingsManager.getSettings().lastFMKey}&format=json`
@@ -258,7 +253,7 @@ class Constants {
     static async getTrackSoundCloudUrl(trackData) {
       if (!trackData) return;
       try {
-        const res = await fetch(
+        const res = await BdApi.Net.fetch(
           encodeURI(
             `https://api-v2.soundcloud.com/search?q=${
               trackData.album?.['#text']
@@ -343,8 +338,8 @@ class Constants {
       this.startPlaying = Date.now();
       this.updateDataInterval = 0;
       this.timeoutPlaying;
-      this.getLocalPresence =
-        BdApi.Webpack.getByKeys('getLocalPresence').getLocalPresence;
+      const presenceStore = BdApi.Webpack.getModule(m => m.getLocalPresence, { searchExports: true });
+      this.getLocalPresence = presenceStore ? presenceStore.getLocalPresence : () => ({ activities: [] });
     }
   
     getName() {
